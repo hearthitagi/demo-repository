@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>轨道巡检机器人运动演示</title>
+    <script src="./d3.v7.min.js"></script>
+    <style>
+        .track {
+            stroke: #999;
+            stroke-width: 4;
+            fill: none;
+        }
+        .robot {
+            fill: steelblue;
+            r: 8;
+        }
+        #container {
+            overflow: hidden;
+        }
+        .cabinet {
+            fill: #666;
+            stroke: #333;
+            stroke-width: 2;
+            cursor: pointer;
+        }
+        .cabinet:hover {
+            fill: #888;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 50%;
+            border-radius: 5px;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover {
+            color: black;
+        }
+    </style>
+</head>
+<body>
+    <div id="container" style="border: 1px solid #ccc;"></div>
+    <button id="toggleAnimation">暂停/继续</button>
+    <div>当前缩放比例: <span id="scaleValue">1.0</span></div>
+
+    <!-- 弹窗 -->
+    <div id="cabinetModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>机柜信息</h2>
+            <p>机柜编号: CAB-001</p>
+            <p>状态: 正常运行</p>
+            <p>温度: 25°C</p>
+            <p>湿度: 45%</p>
+        </div>
+    </div>
+    
+    <script>
+        // 配置对象
+        const config = {
+            // 类名配置
+            classes: {
+                track: 'track',        // 轨道类名
+                robot: 'robot',        // 机器人类名
+                cabinet: 'cabinet',    // 机柜类名
+                container: 'container',// 容器类名
+                modal: 'cabinetModal', // 弹窗类名
+                modalContent: 'modal-content', // 弹窗内容类名
+                close: 'close'         // 关闭按钮类名
+            },
+            // 画布配置
+            canvas: {
+                width: '100%',         // 画布宽度
+                height: 600,           // 画布高度
+                backgroundColor: '#f5f5f5' // 画布背景色
+            },
+            // 轨道配置
+            track: {
+                stroke: '#999',        // 轨道线条颜色
+                strokeWidth: 4,        // 轨道线条宽度
+                segments: [            // 轨道段配置
+                    {type: "line", start: [400,100], end: [1000,100], length: 600}, // 直线段1
+                    {
+                        type: "arc",   // 弧线段1
+                        center: [1000,200], // 圆心坐标
+                        radius: 100,    // 半径
+                        startAngle: 0,  // 起始角度
+                        endAngle: Math.PI, // 结束角度
+                        length: Math.PI * 100 // 弧长
+                    },
+                    {type: "line", start: [1000,300], end: [400,300], length: 600}, // 直线段2
+                    {
+                        type: "arc",   // 弧线段2
+                        center: [400,400], // 圆心坐标
+                        radius: 100,    // 半径
+                        startAngle: 2 * Math.PI, // 起始角度
+                        endAngle: Math.PI, // 结束角度
+                        length: Math.PI * 100 // 弧长
+                    },
+                    {type: "line", start: [400,500], end: [1000,500], length: 600}, // 直线段3
+                ]
+            },
+            // 机器人配置
+            robot: {
+                color: 'steelblue',    // 机器人颜色
+                radius: 8,             // 机器人半径
+                speed: 300,            // 移动速度（像素/秒）
+                startSegment: 0,       // 起始轨道段索引
+                startPosition: 0       // 起始位置（0-1之间）
+            },
+            // 机柜配置
+            cabinet: {
+                // 默认样式
+                defaultStyle: {
+                    color: '#666',     // 机柜颜色
+                    stroke: '#333',    // 边框颜色
+                    strokeWidth: 2,    // 边框宽度
+                    hoverColor: '#888',// 悬停颜色
+                    width: 20,         // 机柜宽度
+                    height: 20        // 机柜高度
+                },
+                // 机柜列表
+                items: [
+                    {
+                        id: 'CAB-001', // 机柜编号
+                        x: 700,        // X坐标
+                        y: 80,        // Y坐标
+                        info: {        // 机柜信息
+                            status: '正常运行',    // 状态
+                            temperature: '25°C',   // 温度
+                            humidity: '45%'        // 湿度
+                        }
+                    },
+                    {
+                        id: 'CAB-002', // 机柜编号
+                        x: 700,        // X坐标
+                        y: 300,        // Y坐标
+                        info: {        // 机柜信息
+                            status: '待检修',      // 状态
+                            temperature: '28°C',   // 温度
+                            humidity: '50%'        // 湿度
+                        }
+                    }
+                ]
+            },
+            // 缩放配置
+            zoom: {
+                minScale: 0.5,         // 最小缩放比例
+                maxScale: 2,           // 最大缩放比例
+                scaleStep: 0.1         // 缩放步长
+            }
+        };
+
+        // 缩放控制变量
+        let scale = 1;                 // 当前缩放比例
+        let transform = {x: 0, y: 0};  // 变换矩阵
+        let isDragging = false;        // 是否正在拖拽
+        let startPos = {x: 0, y: 0};   // 拖拽起始位置
+
+        // 动画控制变量
+        let currentSegment = 0;        // 当前轨道段索引
+        let timer = null;              // 动画定时器
+        let isPaused = false;          // 是否暂停
+        let totalDistance = 960;         //******************* 总移动距离
+        let lastTime = Date.now();     // 上次更新时间
+
+        // 计算总轨道长度
+        const totalTrackLength = config.track.segments.reduce((sum, seg) => sum + seg.length, 0);
+
+        // 创建画布
+        const svg = d3.select(`#${config.classes.container}`)
+            .append("svg")
+            .attr("width", config.canvas.width)
+            .attr("height", config.canvas.height)
+            .style("cursor", "grab")
+            .style("background-color", config.canvas.backgroundColor);
+
+        // 创建缩放组
+        const g = svg.append("g");
+
+        // 绘制轨道
+        const trackLayer = g.append("g").attr("class", config.classes.track);
+        
+        // 绘制直线轨道
+        trackLayer.selectAll(".line-track")
+            .data(config.track.segments.filter(d => d.type === "line"))
+            .enter()
+            .append("path")
+            .attr("d", d => d3.line()([[d.start[0],d.start[1]], [d.end[0],d.end[1]]]))
+            .attr("class", config.classes.track)
+            .style("stroke", config.track.stroke)
+            .style("stroke-width", config.track.strokeWidth);
+
+        // 绘制弧线轨道
+        trackLayer.selectAll(".arc-track")
+            .data(config.track.segments.filter(d => d.type === "arc"))
+            .enter()
+            .append("path")
+            .attr("d", d => d3.arc()
+                .innerRadius(d.radius)
+                .outerRadius(d.radius)
+                .startAngle(d.startAngle)
+                .endAngle(d.endAngle)({...d}))
+            .attr("transform", d => `translate(${d.center})`)
+            .attr("class", config.classes.track)
+            .style("stroke", config.track.stroke)
+            .style("stroke-width", config.track.strokeWidth);
+
+        // 创建机器人
+        const robot = g.append("circle")
+            .attr("class", config.classes.robot)
+            .attr("cx", config.track.segments[0].start[0])
+            .attr("cy", config.track.segments[0].start[1])
+            .attr("r", config.robot.radius)
+            .style("fill", config.robot.color);
+
+        // 创建机柜
+        const cabinets = g.selectAll(`.${config.classes.cabinet}`)
+            .data(config.cabinet.items)
+            .enter()
+            .append("rect")
+            .attr("class", config.classes.cabinet)
+            .attr("x", d => d.x)
+            .attr("y", d => d.y)
+            .attr("width", config.cabinet.defaultStyle.width)
+            .attr("height", config.cabinet.defaultStyle.height)
+            .style("fill", config.cabinet.defaultStyle.color)
+            .style("stroke", config.cabinet.defaultStyle.stroke)
+            .style("stroke-width", config.cabinet.defaultStyle.strokeWidth)
+            .on("mouseover", function() {
+                d3.select(this).style("fill", config.cabinet.defaultStyle.hoverColor);
+            })
+            .on("mouseout", function() {
+                d3.select(this).style("fill", config.cabinet.defaultStyle.color);
+            })
+            .on("click", function(event, d) {
+                // 更新弹窗内容
+                document.getElementById(config.classes.modal).querySelector("h2").textContent = "机柜信息";
+                document.getElementById(config.classes.modal).querySelectorAll("p")[0].textContent = `机柜编号: ${d.id}`;
+                document.getElementById(config.classes.modal).querySelectorAll("p")[1].textContent = `状态: ${d.info.status}`;
+                document.getElementById(config.classes.modal).querySelectorAll("p")[2].textContent = `温度: ${d.info.temperature}`;
+                document.getElementById(config.classes.modal).querySelectorAll("p")[3].textContent = `湿度: ${d.info.humidity}`;
+                // 显示弹窗
+                document.getElementById(config.classes.modal).style.display = "block";
+            });
+
+        // 获取弹窗元素
+        const modal = document.getElementById(config.classes.modal);
+        const span = document.getElementsByClassName(config.classes.close)[0];
+
+        // 点击关闭按钮关闭弹窗
+        span.onclick = function() {
+            modal.style.display = "none";
+        }
+
+        // 点击弹窗外部关闭弹窗
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        // 根据总距离计算位置
+        function calculatePositionByDistance(distance) {
+            // 计算在轨道上的相对位置
+            const relativeDistance = distance % totalTrackLength;
+            
+            // 找到当前所在的轨道段
+            let accumulatedLength = 0;
+            let currentSegIndex = 0;
+            for (let i = 0; i < config.track.segments.length; i++) {
+                if (relativeDistance < accumulatedLength + config.track.segments[i].length) {
+                    currentSegIndex = i;
+                    break;
+                }
+                accumulatedLength += config.track.segments[i].length;
+            }
+            
+            // 计算在当前段内的相对进度
+            const relativeProgress = (relativeDistance - accumulatedLength) / config.track.segments[currentSegIndex].length;
+            
+            // 计算具体位置
+            const segment = config.track.segments[currentSegIndex];
+            if(segment.type === "line") {
+                return [
+                    segment.start[0] + (segment.end[0]-segment.start[0])*relativeProgress,
+                    segment.start[1] + (segment.end[1]-segment.start[1])*relativeProgress
+                ];
+            }
+            if(segment.type === "arc") {
+                const angle = segment.startAngle - Math.PI/2 +
+                    (segment.endAngle - segment.startAngle)*relativeProgress;
+                return [
+                    segment.center[0] + segment.radius * Math.cos(angle),
+                    segment.center[1] + segment.radius * Math.sin(angle)
+                ];
+            }
+            throw new Error(`未知的轨道类型: ${segment.type}`);
+        }
+
+        function animate() {
+            if (isPaused) return;
+            
+            const now = Date.now();
+            const deltaTime = (now - lastTime) / 1000; // 计算时间间隔（秒）
+            lastTime = now;
+            
+            const segmentDistance = deltaTime * config.robot.speed; // 计算本次移动距离
+            totalDistance += segmentDistance; // 累加总距离
+            
+            try {
+                const position = calculatePositionByDistance(totalDistance);
+                robot.attr("cx", position[0]).attr("cy", position[1]);
+            } catch (error) {
+                console.error("动画错误:", error);
+                stopAnimation();
+            }
+        }
+
+        // 初始化机器人位置
+        function initializeRobot(totalDistance) {
+            const position = calculatePositionByDistance(totalDistance); // 计算初始位置
+            robot.attr("cx", position[0]).attr("cy", position[1]);
+        }
+
+        function startAnimation() {
+            if (!timer) {
+                timer = d3.timer(animate); // 创建动画定时器
+            }
+        }
+
+        function stopAnimation() {
+            if (timer) {
+                timer.stop(); // 停止动画定时器
+                timer = null;
+            }
+        }
+
+        function toggleAnimation() {
+            isPaused = !isPaused; // 切换暂停状态
+            if (!isPaused) {
+                lastTime = Date.now(); // 重置上次更新时间
+            }
+        }
+
+        // 缩放控制函数
+        function updateScale(newScale, mouseX, mouseY) {
+            const oldScale = scale; // 保存旧的缩放比例
+            scale = Math.max(config.zoom.minScale, Math.min(config.zoom.maxScale, newScale)); // 计算新的缩放比例
+            
+            // 计算鼠标在画布中的相对位置
+            const containerRect = document.getElementById('container').getBoundingClientRect(); // 获取容器位置信息
+            const mouseXRelative = mouseX - containerRect.left; // 鼠标相对于容器的X坐标
+            const mouseYRelative = mouseY - containerRect.top; // 鼠标相对于容器的Y坐标
+            
+            // 计算缩放前后的坐标差异
+            const x = mouseXRelative - (mouseXRelative - transform.x) * (scale / oldScale); // 新的X坐标
+            const y = mouseYRelative - (mouseYRelative - transform.y) * (scale / oldScale); // 新的Y坐标
+            
+            transform = {x, y}; // 更新变换矩阵
+            updateTransform(); // 应用变换
+            d3.select("#scaleValue").text(scale.toFixed(1)); // 更新缩放比例显示
+        }
+
+        // 更新变换矩阵
+        function updateTransform() {
+            g.attr("transform", `translate(${transform.x},${transform.y}) scale(${scale})`); // 应用平移和缩放变换
+        }
+
+        // 添加滚轮事件监听
+        d3.select(`#${config.classes.container}`).on("wheel", function(event) {
+            event.preventDefault();
+            const delta = event.deltaY > 0 ? -config.zoom.scaleStep : config.zoom.scaleStep;
+            updateScale(scale + delta, event.clientX, event.clientY);
+        });
+
+        // 添加鼠标拖拽事件
+        svg.on("mousedown", function(event) {
+            if (event.button === 0) { // 左键点击
+                isDragging = true;
+                startPos = {
+                    x: event.clientX - transform.x,
+                    y: event.clientY - transform.y
+                };
+                svg.style("cursor", "grabbing");
+            }
+        });
+
+        svg.on("mousemove", function(event) {
+            if (isDragging) {
+                transform.x = event.clientX - startPos.x;
+                transform.y = event.clientY - startPos.y;
+                updateTransform();
+            }
+        });
+
+        svg.on("mouseup", function() {
+            isDragging = false;
+            svg.style("cursor", "grab");
+        });
+
+        svg.on("mouseleave", function() {
+            isDragging = false;
+            svg.style("cursor", "grab");
+        });
+
+        // 添加控制按钮事件
+        d3.select("#toggleAnimation").on("click", toggleAnimation);
+
+        // 启动动画
+        initializeRobot(totalDistance);
+        startAnimation();
+    </script>
+</body>
+</html> 

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RTSP视频流测试工具</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>RTSP视频流测试工具</h1>
+        <div class="input-group">
+            <input type="text" id="serverUrl" placeholder="请输入WebRTC服务器地址" value="http://localhost:8080">
+        </div>
+        <div class="input-group">
+            <input type="text" id="rtspUrl" placeholder="请输入RTSP地址" value="rtsp://admin:plkj0714@192.168.1.108:554/h264/ch1/main/av_stream">
+            <button id="connectBtn">连接视频流</button>
+            <button id="disconnectBtn">断开连接</button>
+        </div>
+        <div class="video-container">
+            <video id="video" muted playsinline autoplay></video>
+        </div>
+        <div class="status">
+            <p id="statusText">状态: 未连接</p>
+        </div>
+    </div>
+    <!-- <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script> -->
+    <script src="adapter-latest.js"></script>
+    <script src="webrtc-streamer.js"></script>
+    <script src="main.js"></script>
+</body>
+</html> 
