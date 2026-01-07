@@ -1,0 +1,25 @@
+<p>模板</p>
+<div style="border: 1px solid #888;">
+<!-- 插值表达式{{}} -->
+<div>{{data}}</div>
+<!-- 管道/过滤器 -->
+<!-- 
+  内置管道
+  Date：格式化日期
+  UpperCase：转化为大写
+  LowerCase：转化为小写
+  Currency：把数字转换成金额字符串，具体参数配置查看API手册
+  Percent：把数字转换成百分比字符串，具体参数配置查看API手册
+  Json：把一个值转换成 JSON 字符串格式。在调试时很有用。
+ -->
+<br>
+<p>管道</p>
+<br>
+<p>{{dateTime | date}}</p>
+<p>使用参数格式化日期： {{ dateTime | date:"yyy/MM/dd" }}</p>
+<p>使用多个管道格式化日期：{{ dateTime | date | uppercase}}</p>
+<br>
+<!-- 特殊的映射管道:i18nPlural -->
+<div>管道之数据映射</div>
+<div>{{ sex | i18nPlural: sexMapping }}</div>
+</div>

@@ -1,0 +1,42 @@
+<p>表单</p>
+<div style="border: 1px solid #888;">
+    <label for="name">Name:</label>
+    <!-- 响应式表单第三步，绑定[formControl] -->
+    <input style="border: 1px solid #888;" id="name" type="text" [formControl]='name'>{{name.value}}
+    <br><br>
+    <!-- 修改表单的值 -->
+    <button (click)="updateName()">修改上面响应式表单的值</button>
+    <br><br><br>
+    <div>表单组</div>
+
+    <form style="border: 1px solid #888;" [formGroup]="profileForm" (ngSubmit)="onSubmit()">
+        <label for="first-name">First Name:</label>
+        <input id="first-name" type="text" formControlName="firstName" placeholder="不能为空">
+        <br>
+        <label for="last-name">Last Name:</label>
+        <input id="last-name" type="text" formControlName="lastName" placeholder="不能为空，输入ipv4格式">
+        <div formGroupName="address">
+            <h3>Address</h3>
+            <label for="street">Street: </label>
+            <input style="border: 1px solid #888;" id="street" type="text" formControlName="street">
+            <br>
+            <label for="city">City: </label>
+            <input style="border: 1px solid #888;" id="city" type="text" formControlName="city">
+            <br>
+        </div>
+        <br>
+        <div formArrayName="aliases">
+            <button (click)="addAlias()" type="button">添加一行表单</button>
+            <div *ngFor="let alias of aliases.controls; let i=index">
+                <label for="alias-{{ i }}">Alias:</label>
+                <input style="border: 1px solid #888;" id="alias-{{ i }}" type="text" [formControlName]="i">
+            </div>
+        </div>
+        <br>
+        <button type="submit" [disabled]="!profileForm.valid">打印表单的值</button>
+        <br><br>
+    </form>
+    <br>
+    <button (click)="updateProfile()">修改嵌套表单组的值</button>
+    <br><br>
+</div>

@@ -1,0 +1,11 @@
+<p>组件</p>
+<div style="border: 1px solid #888;">
+    <p>我是子组件</p>
+    <div>父传子数据-----{{name}}</div>
+<br>
+<!-- 子传父EventEmitter第二步 -->
+<button (click)='someToFather()'>EventEmitter子传父</button>
+<br>
+<!-- 插槽第一步 -->
+<ng-content select="[slot]"></ng-content>
+</div>

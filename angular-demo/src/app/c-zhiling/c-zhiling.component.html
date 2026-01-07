@@ -1,0 +1,38 @@
+<p>指令</p>
+<p>结构型指令</p>
+<div style="border: 1px solid #888;">
+  <div *ngIf="isActive">*ngIf 变量为true时显示</div>
+  <br>
+  <div>*ngFor</div>
+  <span *ngFor="let item of arrayList; let key = index">
+    {{key}}:{{item}}
+  </span>
+  <br><br>
+  <div [ngSwitch]="htmltags">
+    <div>[ngSwitch]</div>
+    <div *ngSwitchCase="'div'">div标签</div>
+    <span *ngSwitchCase="'span'">span标签</span>
+    <p *ngSwitchCase="'p'">p标签</p>
+    <a *ngSwitchDefault>a标签</a>
+  </div>
+</div>
+<p>属性型指令</p>
+<div style="border: 1px solid #888;">
+  <!-- // 如果current变量为true 将会添加current类,否则移除 -->
+  <div [class.current]="current">我有current类</div>
+  <!-- //使用简单的表达式,表达式为true则添加selected类,否则移除 -->
+  <div [class.selected]="hero == hero">我有selected类</div>
+  <!-- // 使用三元运算符,currentClasses变量为true添加present类,否则添加before类 -->
+  <div [ngClass]="currentClasses?'present':'before'">我有before类</div>
+  <!-- // 使用对象 对象中的每个 key 都是一个 CSS 类名，如果它的 value 是 true,这个类就会被加上，否则就会被移除。 -->
+  <div [ngClass]="cssObj">我有saveable和modified类</div>
+  <!-- // 如果isSpecial变量为true 将会添加“#fff”颜色值,否则添加“#03a9f4”值。 -->
+  <div [style.color]="isSpecial? '#03a9f4' : '#fff'">isSpecial为true,颜色是#03a9f4</div>
+  <!-- //带单位的样式绑定 -->
+  <div [style.padding.px]="isSpecial">isSpecial为15,padding为15px</div>
+  <!-- // 使用对象的形式 -->
+  <div [ngStyle]="expression">我的样式由expression对象控制</div>
+</div>
+<!-- 双向数据绑定()需要导入FormsModule -->
+<!-- 模板驱动表单 -->
+双向数据绑定:<input style="border: 1px solid #888;" type="text" [(ngModel)]="value3">{{value3}}

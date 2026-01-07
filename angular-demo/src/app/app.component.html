@@ -1,0 +1,32 @@
+<!-- 子传父模板引用第一步 #child (也可以引用方法) -->
+<!-- 父传子@Input第二步 父组件通过属性型绑定传递数据 [name] = "数据",[name] 是子组件中定义的接受数据的变量 -->
+<!-- 子传父EventEmitter第三步 (toFather) 监听子组件的自定义事件,并绑定事件处理函数 通过$event接受传递的参数 -->
+<app-a-zujian #child [name]='fatherData' (toFather)='fromSon($event)'>
+  <!-- 插槽第二步 -->
+  <p slot>这是插槽的内容，已经升级为具名插槽</p>
+</app-a-zujian>
+<br>
+<div>子传父EventEmitter-----{{EventEmitterData}}</div>
+<br>
+<!-- 子传父模板引用第二步(也可以引用方法) -->
+<div>子传父模板引用-------{{child.mobanData}}</div>
+<br>
+<!-- 子传父@ViewChild()第二步 -->
+<button (click)="getSon()">获取子组件数据</button>
+<div>子传父@ViewChild----{{viewChildData}}</div>
+<br><br>
+<app-b-moban></app-b-moban>
+<br><br>
+<app-c-zhiling></app-c-zhiling>
+<br><br>
+<app-d-luyou></app-d-luyou>
+<!-- 路由第三步,置入 -->
+<router-outlet></router-outlet>
+<br><br>
+
+<!-- 表单 -->
+<!-- <app-e-biaodan></app-e-biaodan> -->
+
+<app-f-qingqiu></app-f-qingqiu>
+<br><br><br><br>
+<app-g-donghua></app-g-donghua>

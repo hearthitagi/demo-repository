@@ -4,4 +4,6 @@ d3.js-track-demo: 利用d3.js绘制的机器人轨道运动
 
 video-test：webrtc-streamer前端测试程序
 
-React15老版本空项目，做记录用
+react15-demo：React15老版本空项目，做记录用
+
+angluar-demo：Angluar练习demo项目

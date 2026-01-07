@@ -1,0 +1,11 @@
+<p>
+  动画
+</p>
+<div style="border: 1px solid #888;">
+<button (click)="toggle()">Toggle Open/Close</button>
+<div [@openClose]="isOpen ? 'open' : 'closed'" class="open-close-container">
+  <p>The box is now {{ isOpen ? 'Open' : 'Closed' }}!</p>
+</div>
+<div *ngFor="let item of list">列表{{item}}</div>
+<button (click)=add()>增加吧</button>
+</div>

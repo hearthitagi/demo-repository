@@ -1,0 +1,17 @@
+/*
+https://angular.cn/guide/component-styles#special-selectors
+:host
+每个组件都会关联一个与其组件选择器相匹配的元素。这个元素称为宿主元素，模板会渲染到其中。
+:host 伪类选择器可用于创建针对宿主元素自身的样式，而不是针对宿主内部的那些元素。
+:host-context
+有时候，需要以某些来自宿主的祖先元素为条件来决定是否要应用某些样式。 
+例如，在文档的 <body> 元素上可能有一个用于表示样式主题 (theme) 的 CSS 类，你应当基于它来决定组件的样式。
+这时可以使用 :host-context() 伪类选择器。它也以类似 :host() 形式使用。它在当前组件宿主元素的祖先节点中查找 CSS 类， 直到文档的根节点为止。它只能与其它选择器组合使用。
+在下面的例子中，只有当该组件的某个祖先元素有 CSS 类 active 时，才会把该组件内部的所有文本置为斜体。
+:host-context(.active) {
+  font-style: italic;
+}
+*/ 
+.control{
+  border: 1px solid black;
+}

@@ -1,0 +1,12 @@
+<p>
+  请求
+</p>
+<ul *ngIf="todos$ | async as todos else noData">
+  <li *ngFor="let todo of todos">
+    <span>Title: {{todo.title}}</span> ——
+    <span>Completed: {{todo.completed}}</span>
+  </li>
+</ul>
+<ng-template #noData>No Data Available</ng-template>
+<br><br>
+<button (click)="createNewTodo()">发送post请求</button>
