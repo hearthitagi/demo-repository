@@ -1,0 +1,59 @@
+{
+  "name": "electron-demo",
+  "version": "1.0.6",
+  "main": "main.js",
+  "author": {
+    "name": "cai",
+    "email": "1760603940@qq.com"
+  },
+  "license": "ISC",
+  "description": "demo",
+  "homepage": "https://github.com/hearthitagi",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "build:icon": "electron-icon-builder --input=./public/icon.png --output=release --flatten"
+  },
+  "devDependencies": {
+    "electron": "^33.2.1",
+    "electron-builder": "^25.1.8",
+    "electron-icon-builder": "^2.0.1"
+  },
+  "build": {
+    "appId": "com.kissshot.electrondemo",
+    "productName": "ElectronDemo",
+    "directories": {
+      "output": "dist"
+    },
+    "linux": {
+      "icon": "./release/icons",
+      "target": "deb",
+      "category": "Utility"
+    },
+    "deb": {
+      "afterInstall": "./entries/install.sh"
+    },
+    "extraFiles": [
+      {
+        "from": "entries",
+        "to": "entries"
+      }
+    ],
+    "win": {
+      "icon": "./release/icons",
+      "target": [
+        "nsis",
+        "zip"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": false,
+      "deleteAppDataOnUninstall": true
+    }
+  }
+}
