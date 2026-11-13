@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docker 管理</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="main.css">
+</head>
+<body>
+    <div class="global-btn">
+        <button class="logout-btn" onclick="logout()">退出登录</button>
+    </div>
+    <div class="search-container">
+        <div class="search-box">
+            <input type="text" class="search-input" placeholder="" id="searchInput">
+            <button class="search-button" onclick="performSearch()">搜索</button>
+        </div>
+    </div>
+    <!-- 收藏网站 -->
+    <div class="website-section">
+        <h1>网站</h1>
+        <div class="header-buttons">
+            <button class="refresh-btn" onclick="openAddWebsiteModal()">
+                <span>添加网站</span>
+            </button>
+        </div>
+    </div>
+    
+    <div id="website-list"></div>
+
+    <!-- 网站右键菜单 -->
+    <div id="websiteContextMenu" class="context-menu">
+        <div class="context-menu-item" onclick="deleteWebsite()">删除网站</div>
+    </div>
+
+    <!-- 添加网站模态框 -->
+    <div id="addWebsiteModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>添加网站</h3>
+                <button class="close-btn" onclick="closeAddWebsiteModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="websiteUrl">网站链接</label>
+                    <input type="text" id="websiteUrl" placeholder="请输入网站链接">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="cancel-btn" onclick="closeAddWebsiteModal()">取消</button>
+                <button class="save-btn" onclick="saveWebsite()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 本地容器 -->
+    <div class="header">
+        <h1>容器</h1>
+        <div class="header-buttons">
+            <button class="refresh-btn" onclick="fetchContainers()">
+                <span>刷新容器</span>
+            </button>
+        </div>
+    </div>
+
+    <div id="error" class="error-message"></div>
+    <div id="container-list"></div>
+
+    <!-- 容器卡片模板 -->
+    <template id="container-template">
+        <div class="container">
+            <h3></h3>
+            <span class="status-badge"></span>
+            <div class="buttons">
+                <button class="open-btn" style="display: none">打开</button>
+                <button class="control-btn"><span></span></button>
+                <button class="config-btn">配置</button>
+            </div>
+        </div>
+    </template>
+
+    <!-- 配置模态框 -->
+    <div id="configModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>配置</h3>
+                <button class="close-btn" onclick="closeConfigModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="containerLink">启动链接</label>
+                    <input type="text" id="containerLink" placeholder="请输入容器启动链接">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="cancel-btn" onclick="closeConfigModal()">取消</button>
+                <button class="save-btn" onclick="saveContainerLink()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html> 
